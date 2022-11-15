@@ -27,19 +27,31 @@ class StorageClient(CmsClient):
                     return response_body
 
     async def retrieve(self, storage_id: str = None, project_id: str = None, collection_position: int = 1):
+        params = {"collection_position": collection_position}
+        if storage_id:
+            params["storage_id"] = storage_id
+        if project_id:
+            params["project_id"] = project_id
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "storage/retrieve/",
-                params={"storage_id": storage_id, "project_id": project_id, "collection_position": collection_position}
+                params=params
             ) as response:
                 response_body = await response.json()
                 return response_body
 
     async def list(self, user_id: str = None, skip: int = None, limit: int = None, collection_position: int = 1):
+        params = {"collection_position": collection_position}
+        if user_id:
+            params["user_id"] = user_id
+        if skip:
+            params["skip"] = skip
+        if limit:
+            params["limit"] = limit
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "storage/list/",
-                params={"user_id": user_id, "skip": skip, "limit": limit, "collection_position": collection_position}
+                params=params
             ) as response:
                 response_body = await response.json()
                 return response_body

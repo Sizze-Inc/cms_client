@@ -37,12 +37,17 @@ class TableClient(CmsClient):
                 return response_body
 
     async def list(self, storage_id: str = None, skip: int = None, limit: int = None, collection_position: int = 1):
+        params = {"collection_position": collection_position}
+        if storage_id:
+            params["storage_id"] = storage_id
+        if skip:
+            params["skip"] = skip
+        if limit:
+            params["limit"] = limit
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "table/list/",
-                params={
-                    "storage_id": storage_id, "skip": skip, "limit": limit, "collection_position": collection_position
-                }
+                params=params
             ) as response:
                 response_body = await response.json()
                 return response_body

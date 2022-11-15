@@ -31,15 +31,21 @@ class ValuesClient(CmsClient):
 
     async def list(self, table_id: str = None, storage_id: str = None, filtering: dict = None,
                    skip: int = None, limit: int = None, collection_position: int = 1):
+        params = {"collection_position": collection_position}
+        if storage_id:
+            params["storage_id"] = storage_id
+        if table_id:
+            params["table_id"] = table_id
+        if skip:
+            params["skip"] = skip
+        if limit:
+            params["limit"] = limit
         if filtering is None:
-            filtering = {}
+            params["filtering"] = {}
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "value/list/",
-                params={
-                    "storage_id": storage_id, "table_id": table_id, "filtering": filtering,
-                    "skip": skip, "limit": limit, "collection_position": collection_position
-                }
+                params=params
             ) as response:
                 response_body = await response.json()
                 return response_body
