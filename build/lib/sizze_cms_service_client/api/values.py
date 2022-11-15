@@ -6,7 +6,7 @@ class ValuesClient(CmsClient):
     async def create(self, values: dict, table_id: str, index: str = None, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url=self.base_url + "values/create/",
+                url=self.base_url + "value/create/",
                 params={"collection_position": collection_position},
                 json={
                     "values": values,
