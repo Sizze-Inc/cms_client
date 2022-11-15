@@ -4,7 +4,7 @@ from sizze_cms_service_client.api.collection import CmsClient
 
 class StorageClient(CmsClient):
     async def create(self, project_id: int, users: list = None, tables: list = None, index: str = None,
-                     collection_position: int = None):
+                     collection_position: int = 1):
         if tables is None:
             tables = []
         if users is None:
@@ -26,7 +26,7 @@ class StorageClient(CmsClient):
                 else:
                     return response_body
 
-    async def retrieve(self, storage_id: str = None, project_id: str = None, collection_position: int = None):
+    async def retrieve(self, storage_id: str = None, project_id: str = None, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "storage/retrieve/",
@@ -35,7 +35,7 @@ class StorageClient(CmsClient):
                 response_body = await response.json()
                 return response_body
 
-    async def list(self, user_id: str = None, skip: int = None, limit: int = None, collection_position: int = None):
+    async def list(self, user_id: str = None, skip: int = None, limit: int = None, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "storage/list/",
@@ -45,7 +45,7 @@ class StorageClient(CmsClient):
                 return response_body
 
     async def update(self, storage_id: str, storage_map: dict, project_id: int = None, users: list = None,
-                     tables: list = None, collection_position: int = None):
+                     tables: list = None, collection_position: int = 1):
         data = {}
         if project_id:
             data["project_id"] = project_id
@@ -68,7 +68,7 @@ class StorageClient(CmsClient):
                 else:
                     return response_body
 
-    async def delete(self, storage_id: str, collection_position: int = None):
+    async def delete(self, storage_id: str, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.delete(
                 url=self.base_url + f"storage/{storage_id}/delete/",

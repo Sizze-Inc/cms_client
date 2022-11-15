@@ -4,7 +4,7 @@ from sizze_cms_service_client.api.collection import CmsClient
 
 class TableClient(CmsClient):
     async def create(self, storage_id: str, table_name: str, fields: list = None, values: list = None,
-                     index: str = None, collection_position: int = None):
+                     index: str = None, collection_position: int = 1):
         data = {
             "storage_id": storage_id,
             "name": table_name,
@@ -27,7 +27,7 @@ class TableClient(CmsClient):
                 else:
                     return response_body
 
-    async def retrieve(self, table_id: str, collection_position: int = None):
+    async def retrieve(self, table_id: str, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "table/retrieve/",
@@ -36,7 +36,7 @@ class TableClient(CmsClient):
                 response_body = await response.json()
                 return response_body
 
-    async def list(self, storage_id: str = None, skip: int = None, limit: int = None, collection_position: int = None):
+    async def list(self, storage_id: str = None, skip: int = None, limit: int = None, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "table/list/",
@@ -48,7 +48,7 @@ class TableClient(CmsClient):
                 return response_body
 
     async def update(self, table_id: str, name: str = None, position: int = None,
-                     fields: list = None, values: list = None, collection_position: int = None):
+                     fields: list = None, values: list = None, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             data = {}
             if name:
@@ -70,7 +70,7 @@ class TableClient(CmsClient):
                     return response_body.get("_id")
                 return response_body
 
-    async def delete(self, table_id: str, collection_position: int = None):
+    async def delete(self, table_id: str, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.delete(
                 url=self.base_url + f"table/{table_id}/delete/",
@@ -81,7 +81,7 @@ class TableClient(CmsClient):
                 else:
                     return False
 
-    async def copy(self, table_id: str, to_storage_id: str, collection_position: int = None):
+    async def copy(self, table_id: str, to_storage_id: str, collection_position: int = 1):
         original_table = await self.retrieve(table_id=table_id, collection_position=collection_position)
         copy_table = await self.create(storage_id=to_storage_id, table_name=original_table.get("name"), index=table_id)
         return copy_table
