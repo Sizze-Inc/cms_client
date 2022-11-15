@@ -17,8 +17,6 @@ class ValuesClient(CmsClient):
                 response_body = await response.json()
                 if response.status == 201:
                     return response_body.get("_id")
-                elif response_body.get("result") is False:
-                    return response_body.get("message")
                 else:
                     return response_body
 
@@ -29,10 +27,7 @@ class ValuesClient(CmsClient):
                 params={"value_id": value_id, "collection_position": collection_position}
             ) as response:
                 response_body = await response.json()
-                if response_body.get("result") is False:
-                    return response_body.get("message")
-                else:
-                    return response_body
+                return response_body
 
     async def list(self, table_id: str = None, storage_id: str = None, filtering: dict = None,
                    skip: int = None, limit: int = None, collection_position: int = None):
@@ -47,10 +42,7 @@ class ValuesClient(CmsClient):
                 }
             ) as response:
                 response_body = await response.json()
-                if response_body.get("result") is False:
-                    return response_body.get("message")
-                else:
-                    return response_body
+                return response_body
 
     async def update(self, value_id: str, values: dict, position: int,
                      table_id: str = None, storage_id: str = None, collection_position: int = None):
@@ -73,10 +65,7 @@ class ValuesClient(CmsClient):
                 response_body = await response.json()
                 if response.status == 200:
                     return response_body.get("_id")
-                elif response_body.get("result") is False:
-                    return response_body.get("message")
-                else:
-                    return response_body
+                return response_body
 
     async def delete(self, value_id: str, collection_position: int = None):
         async with aiohttp.ClientSession() as session:

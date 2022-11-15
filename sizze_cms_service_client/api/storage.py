@@ -23,22 +23,17 @@ class StorageClient(CmsClient):
                 response_body = await response.json()
                 if response.status == 201:
                     return response_body.get("_id")
-                elif response_body.get("result") is False:
-                    return response_body.get("message")
                 else:
                     return response_body
 
-    async def retrieve(self, storage_id: str, collection_position: int = None):
+    async def retrieve(self, storage_id: str = None, project_id: str = None, collection_position: int = None):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "storage/retrieve/",
-                params={"storage_id": storage_id, "collection_position": collection_position}
+                params={"storage_id": storage_id, "project_id": project_id, "collection_position": collection_position}
             ) as response:
                 response_body = await response.json()
-                if response_body.get("result") is False:
-                    return response_body.get("message")
-                else:
-                    return response_body
+                return response_body
 
     async def list(self, user_id: str = None, skip: int = None, limit: int = None, collection_position: int = None):
         async with aiohttp.ClientSession() as session:
@@ -47,13 +42,10 @@ class StorageClient(CmsClient):
                 params={"user_id": user_id, "skip": skip, "limit": limit, "collection_position": collection_position}
             ) as response:
                 response_body = await response.json()
-                if response_body.get("result") is False:
-                    return response_body.get("message")
-                else:
-                    return response_body
+                return response_body
 
-    async def update(self, storage_id: str, project_id: int = None, users: list = None, tables: list = None,
-                     collection_position: int = None):
+    async def update(self, storage_id: str, storage_map: dict, project_id: int = None, users: list = None,
+                     tables: list = None, collection_position: int = None):
         data = {}
         if project_id:
             data["project_id"] = project_id
@@ -61,6 +53,8 @@ class StorageClient(CmsClient):
             data["users"] = users
         if tables:
             data["tables"] = tables
+        if storage_map:
+            data["map"] = storage_map
 
         async with aiohttp.ClientSession() as session:
             async with session.put(
@@ -71,8 +65,6 @@ class StorageClient(CmsClient):
                 response_body = await response.json()
                 if response.status == 200:
                     return response_body.get("_id")
-                elif response_body.get("result") is False:
-                    return response_body.get("message")
                 else:
                     return response_body
 

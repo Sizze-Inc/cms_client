@@ -18,8 +18,6 @@ class FieldsClient(CmsClient):
                 response_body = await response.json()
                 if response.status == 201:
                     return response_body.get("_id")
-                elif response_body.get("result") is False:
-                    return response_body.get("message")
                 else:
                     return response_body
 
@@ -30,10 +28,7 @@ class FieldsClient(CmsClient):
                 params={"field_id": field_id, "collection_position": collection_position}
             ) as response:
                 response_body = await response.json()
-                if response_body.get("result") is False:
-                    return response_body.get("message")
-                else:
-                    return response_body
+                return response_body
 
     async def list(self, table_id: str = None, storage_id: str = None, filtering: dict = None,
                    skip: int = None, limit: int = None, collection_position: int = None):
@@ -48,10 +43,7 @@ class FieldsClient(CmsClient):
                 }
             ) as response:
                 response_body = await response.json()
-                if response_body.get("result") is False:
-                    return response_body.get("message")
-                else:
-                    return response_body
+                return response_body
 
     async def update(self, field_id: str, field: dict, position: int, name: str,
                      table_id: str = None, storage_id: str = None, collection_position: int = None):
@@ -74,8 +66,6 @@ class FieldsClient(CmsClient):
                 response_body = await response.json()
                 if response.status == 200:
                     return response_body.get("_id")
-                elif response_body.get("result") is False:
-                    return response_body.get("message")
                 else:
                     return response_body
 
