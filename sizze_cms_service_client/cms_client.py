@@ -1,4 +1,4 @@
-from api import fields, storage, tables, values, copy
+from sizze_cms_service_client.api import fields, storage, tables, values, copy
 
 
 fields_client = None
