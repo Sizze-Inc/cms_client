@@ -1,0 +1,8 @@
+setup.py
+sizze_cms_client.egg-info/PKG-INFO
+sizze_cms_client.egg-info/SOURCES.txt
+sizze_cms_client.egg-info/dependency_links.txt
+sizze_cms_client.egg-info/top_level.txt
+sizze_cms_service_client/__init__.py
+sizze_cms_service_client/cms_client.py
+sizze_cms_service_client/settings.py
