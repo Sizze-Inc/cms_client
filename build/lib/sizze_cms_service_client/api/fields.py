@@ -44,10 +44,7 @@ class FieldsClient(CmsClient):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "field/list/",
-                params={
-                    "table_id": table_id, "filtering": filtering,
-                    "skip": skip, "limit": limit, "collection_position": collection_position
-                }
+                params=params
             ) as response:
                 response_body = await response.json()
                 return response_body
