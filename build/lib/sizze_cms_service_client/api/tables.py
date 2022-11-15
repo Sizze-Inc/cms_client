@@ -59,7 +59,7 @@ class TableClient(CmsClient):
             if name:
                 data["name"] = name
             if position:
-                data["position"]: position
+                data["position"] = position
             if fields:
                 data["fields"] = fields
             if values:
