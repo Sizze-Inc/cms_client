@@ -35,8 +35,8 @@ class FieldsClient(CmsClient):
         params = {}
         if table_id:
             params["table_id"] = table_id
-        if filtering is None:
-            params["filtering"] = {}
+        # if filtering is None:
+        #     params["filtering"] = {}
         if skip:
             params["skip"] = skip
         if limit:
