@@ -30,15 +30,22 @@ class FieldsClient(CmsClient):
                 response_body = await response.json()
                 return response_body
 
-    async def list(self, table_id: str = None, storage_id: str = None, filtering: dict = None,
+    async def list(self, table_id: str = None, filtering: dict = None,
                    skip: int = None, limit: int = None, collection_position: int = 1):
+        params = {}
+        if table_id:
+            params["table_id"] = table_id
         if filtering is None:
-            filtering = {}
+            params["filtering"] = {}
+        if skip:
+            params["skip"] = skip
+        if limit:
+            params["limit"] = limit
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "field/list/",
                 params={
-                    "storage_id": storage_id, "table_id": table_id, "filtering": filtering,
+                    "table_id": table_id, "filtering": filtering,
                     "skip": skip, "limit": limit, "collection_position": collection_position
                 }
             ) as response:
