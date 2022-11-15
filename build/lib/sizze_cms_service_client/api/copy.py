@@ -1,5 +1,5 @@
-from api.collection import CmsClient
-from api import fields, storage, tables, values
+from sizze_cms_service_client.api.collection import CmsClient
+from sizze_cms_service_client.api import fields, storage, tables, values
 
 
 class CopyClient(CmsClient):

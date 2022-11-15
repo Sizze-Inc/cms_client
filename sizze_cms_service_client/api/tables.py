@@ -1,5 +1,5 @@
 import aiohttp
-from api.collection import CmsClient
+from sizze_cms_service_client.api.collection import CmsClient
 
 
 class TableClient(CmsClient):
