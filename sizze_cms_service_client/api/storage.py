@@ -13,7 +13,7 @@ class StorageClient(CmsClient):
             async with session.post(
                 url=self.base_url + "storage/create/",
                 params={"collection_position": collection_position},
-                data={
+                json={
                     "project_id": project_id,
                     "users": users,
                     "tables": tables,
@@ -72,7 +72,7 @@ class StorageClient(CmsClient):
             async with session.put(
                 url=self.base_url + f"storage/{storage_id}/update/",
                 params={"collection_position": collection_position},
-                data=data
+                json=data
             ) as response:
                 response_body = await response.json()
                 if response.status == 200:
