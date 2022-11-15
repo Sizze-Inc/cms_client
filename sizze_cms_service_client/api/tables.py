@@ -6,7 +6,7 @@ class TableClient(CmsClient):
     async def create(self, storage_id: str, table_name: str, fields: list = None, values: list = None,
                      index: str = None, collection_position: int = 1):
         data = {
-            "storage_id": storage_id,
+            "storage": storage_id,
             "name": table_name,
             "index": index
         }
