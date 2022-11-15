@@ -8,7 +8,7 @@ class ValuesClient(CmsClient):
             async with session.post(
                 url=self.base_url + "values/create/",
                 params={"collection_position": collection_position},
-                data={
+                json={
                     "values": values,
                     "table": table_id,
                     "index": index
@@ -66,7 +66,7 @@ class ValuesClient(CmsClient):
             async with session.put(
                 url=self.base_url + f"value/{value_id}/update/",
                 params={"collection_position": collection_position},
-                data=data
+                json=data
             ) as response:
                 response_body = await response.json()
                 if response.status == 200:
