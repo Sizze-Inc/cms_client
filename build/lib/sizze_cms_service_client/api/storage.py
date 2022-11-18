@@ -110,7 +110,7 @@ class StorageClient(CmsClient):
                     field_client = FieldsClient(base_url=self.base_url)
                     for field in fields:
                         field["table"] = table_create
-                        if field["field"] is not None:
+                        if field["field"]["to_table"] is not None:
                             to_table = field["field"]["to_table"].split(".")
                             field["field"]["to_table"] = template[to_table[0]][to_table[1]]
                         print("table: ", table_create)
