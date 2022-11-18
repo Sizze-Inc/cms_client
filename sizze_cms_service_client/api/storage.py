@@ -99,10 +99,11 @@ class StorageClient(CmsClient):
                     return False
 
     async def template_create(self, template, storage):
+        split_val = "$"
         for table in template:
             table_client = TableClient(base_url=self.base_url)
             table_create = await table_client.create(storage_id=storage, table_name=table.get("name"))
-            print(table_create)
+            table["_id"] = table_create
             if table_create:
                 fields = table.get("fields")
                 values = table.get("values")
@@ -111,42 +112,41 @@ class StorageClient(CmsClient):
                     for field in fields:
                         field["table"] = table_create
                         if field["field"]["to_table"] is not None:
-                            to_table = field["field"]["to_table"].split(".")
-                            field["field"]["to_table"] = template[to_table[0]][to_table[1]]
-                        print("table: ", table_create)
-                        print("field: ", field)
+                            to_table = field["field"]["to_table"].split(split_val)
+                            table = next(item for item in template if item["name"] == to_table[0])
+                            field["field"]["to_table"] = table[to_table[1]]
                         field_create = await field_client.create(
                             table=table_create, field=field["field"], name=field["name"]
                         )
-                        print(field_create)
                         field["_id"] = field_create
 
                 if isinstance(values, list) and len(values) > 0:
                     value_client = ValuesClient(base_url=self.base_url)
                     for value in values:
                         value["table"] = table_create
+                        value["new_values"] = {}
                         for key, val in value["values"].items():
-                            new_key = key.strip(".")
-                            new_val = val.strip(".")
+                            new_key = key.split(split_val)
+                            if isinstance(val, str):
+                                new_val = val.split(split_val)
+                            else:
+                                new_val = None
+
                             if len(new_key) > 1:
                                 table = next(item for item in template if item["name"] == new_key[0])
-                                new_key = table[new_key[1]][new_key[2]][new_key[3]]
+                                new_key = table[new_key[1]][int(new_key[2])][new_key[3]]
                             else:
                                 new_key = key
 
-                            if len(new_val) > 1:
+                            if new_val and len(new_val) > 1:
                                 table = next(item for item in template if item["name"] == new_val[0])
-                                new_val = table[new_val[1]][new_val[2]][new_val[3]]
+                                new_val = table[new_val[1]][int(new_val[2])][new_val[3]]
                             else:
                                 new_val = val
 
-                            del value["values"][key]
-                            value["values"][new_key] = new_val
+                            value["new_values"][new_key] = new_val
 
-                        print("table: ", table_create)
-                        print("values ", value.get("values"))
                         value_create = await value_client.create(
-                            values=value.get("values"), table_id=table_create
+                            values=value.get("new_values"), table_id=table_create
                         )
-                        print(value_create)
                         value["_id"] = value_create
