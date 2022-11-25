@@ -40,8 +40,8 @@ class ValuesClient(CmsClient):
             params["skip"] = skip
         if limit:
             params["limit"] = limit
-        # if filtering is None:
-        #     params["filtering"] = {}
+        if filtering:
+            params["filtering"] = filtering
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "value/list/",
