@@ -20,11 +20,11 @@ class ValuesClient(CmsClient):
                 else:
                     return response_body
 
-    async def retrieve(self, value_id: str, collection_position: int = 1):
+    async def retrieve(self, value_id: str, depth: bool = False, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "value/retrieve/",
-                params={"value_id": value_id, "collection_position": collection_position}
+                params={"value_id": value_id, "collection_position": collection_position, "depth": depth}
             ) as response:
                 response_body = await response.json()
                 return response_body
