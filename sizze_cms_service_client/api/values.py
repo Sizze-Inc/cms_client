@@ -20,7 +20,7 @@ class ValuesClient(CmsClient):
                 else:
                     return response_body
 
-    async def retrieve(self, value_id: str, depth: bool = False, collection_position: int = 1):
+    async def retrieve(self, value_id: str, depth: int = 0, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "value/retrieve/",
@@ -29,9 +29,9 @@ class ValuesClient(CmsClient):
                 response_body = await response.json()
                 return response_body
 
-    async def list(self, table_id: str = None, storage_id: str = None, filtering: dict = None, depth: bool = False,
+    async def list(self, table_id: str = None, storage_id: str = None, filtering: dict = None, depth: int = 0,
                    skip: int = None, limit: int = None, collection_position: int = 1):
-        params = {"collection_position": collection_position}
+        params = {"depth": depth, "collection_position": collection_position}
         if storage_id:
             params["storage_id"] = storage_id
         if table_id:
@@ -42,8 +42,6 @@ class ValuesClient(CmsClient):
             params["limit"] = limit
         if filtering:
             params["filtering"] = filtering
-        if depth:
-            params["depth"] = depth
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "value/list/",
