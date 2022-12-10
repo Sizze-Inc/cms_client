@@ -1,17 +1,17 @@
 from sizze_cms_service_client.api import fields, storage, tables, values, copy
 
 
-fields_client = None
-storage_client = None
-table_client = None
-value_client = None
-copy_client = None
+fields_client = fields.FieldsClient()
+storage_client = storage.StorageClient()
+table_client = tables.TableClient()
+value_client = values.ValuesClient()
+copy_client = copy.CopyClient()
 
 
 def client(base_url: str):
     global fields_client, storage_client, table_client, value_client, copy_client
-    copy_client = copy.CopyClient(base_url=base_url)
-    fields_client = fields.FieldsClient(base_url=base_url)
-    storage_client = storage.StorageClient(base_url=base_url)
-    table_client = tables.TableClient(base_url=base_url)
-    value_client = values.ValuesClient(base_url=base_url)
+    copy_client.set_base_url(base_url)
+    fields_client.set_base_url(base_url)
+    storage_client.set_base_url(base_url)
+    table_client.set_base_url(base_url)
+    value_client.set_base_url(base_url)

@@ -1,7 +1,7 @@
 Metadata-Version: 2.1
 Name: sizze-cms-client
-Version: 0.3.4
-Summary: add related retrieve
+Version: 0.3.5
+Summary: change init method
 Home-page: UNKNOWN
 Author: kabu1zhan
 License: Sizze
