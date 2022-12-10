@@ -1,5 +1,6 @@
 import aiohttp
 from sizze_cms_service_client.api.collection import CmsClient
+from sizze_cms_service_client.api.fields import FieldsClient
 
 
 class TableClient(CmsClient):
@@ -35,6 +36,23 @@ class TableClient(CmsClient):
             ) as response:
                 response_body = await response.json()
                 return response_body
+
+    async def related_retrieve(self, table_id, collection_position: int = 1):
+        fields_client = FieldsClient(base_url=self.base_url)
+        table = await self.retrieve(table_id=table_id, collection_position=collection_position)
+        fields = await fields_client.list(table_id=table_id, collection_position=collection_position)
+        table["fields"] = fields
+        tables = [table]
+        for field in fields:
+            if field["field"]["to_table"]:
+                related_table = await self.retrieve(
+                    table_id=field["field"]["to_table"], collection_position=collection_position
+                )
+                related_table["fields"] = await fields_client.list(
+                    table_id=field["field"]["to_table"], collection_position=collection_position
+                )
+                tables.append(related_table)
+        return tables
 
     async def list(self, storage_id: str = None, skip: int = None, limit: int = None, collection_position: int = 1):
         params = {"collection_position": collection_position}
