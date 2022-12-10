@@ -38,7 +38,8 @@ class TableClient(CmsClient):
                 return response_body
 
     async def related_retrieve(self, table_id, collection_position: int = 1):
-        fields_client = FieldsClient(base_url=self.base_url)
+        fields_client = FieldsClient()
+        fields_client.set_base_url(base_url=self.base_url)
         table = await self.retrieve(table_id=table_id, collection_position=collection_position)
         fields = await fields_client.list(table_id=table_id, collection_position=collection_position)
         table["fields"] = fields
