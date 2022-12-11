@@ -37,23 +37,24 @@ class TableClient(CmsClient):
                 response_body = await response.json()
                 return response_body
 
-    async def related_retrieve(self, table_id, collection_position: int = 1):
+    async def related_retrieve(self, table_id, collection_position: int = 1, table_path=None, checked_tables=None):
+        if table_path is None:
+            table_path = []
+        if checked_tables is None:
+            checked_tables = set()
+        checked_tables.add(table_id)
         fields_client = FieldsClient()
         fields_client.set_base_url(base_url=self.base_url)
         table = await self.retrieve(table_id=table_id, collection_position=collection_position)
         fields = await fields_client.list(table_id=table_id, collection_position=collection_position)
         table["fields"] = fields
-        tables = [table]
+        table_path.append(table)
         for field in fields:
-            if field["field"]["to_table"]:
-                related_table = await self.retrieve(
-                    table_id=field["field"]["to_table"], collection_position=collection_position
+            if field["field"]["to_table"] and field["field"]["to_table"] not in checked_tables:
+                await self.related_retrieve(
+                    table_id=field["field"]["to_table"], table_path=table_path, checked_tables=checked_tables
                 )
-                related_table["fields"] = await fields_client.list(
-                    table_id=field["field"]["to_table"], collection_position=collection_position
-                )
-                tables.append(related_table)
-        return tables
+        return table_path
 
     async def list(self, storage_id: str = None, skip: int = None, limit: int = None, collection_position: int = 1):
         params = {"collection_position": collection_position}
