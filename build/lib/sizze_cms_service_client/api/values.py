@@ -3,75 +3,43 @@ from sizze_cms_service_client.api.collection import CmsClient
 
 
 class ValuesClient(CmsClient):
-    async def create(self, values: dict, table_id: str, index: str = None, collection_position: int = 1):
+    async def create(self, data: dict, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=self.base_url + "value/create/",
                 params={"collection_position": collection_position},
-                json={
-                    "values": values,
-                    "table": table_id,
-                    "index": index
-                }
+                json=data
             ) as response:
                 response_body = await response.json()
-                if response.status == 201:
-                    return response_body.get("_id")
-                else:
-                    return response_body
+                return response_body, response.status
 
-    async def retrieve(self, value_id: str, depth: int = 0, collection_position: int = 1):
+    async def retrieve(self, **params):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "value/retrieve/",
-                params={"value_id": value_id, "collection_position": collection_position, "depth": depth}
+                params=params
             ) as response:
                 response_body = await response.json()
-                return response_body
+                return response_body, response.status
 
-    async def list(self, table_id: str = None, storage_id: str = None, filtering: dict = None, depth: int = 0,
-                   skip: int = None, limit: int = None, collection_position: int = 1):
-        params = {"depth": depth, "collection_position": collection_position}
-        if storage_id:
-            params["storage_id"] = storage_id
-        if table_id:
-            params["table_id"] = table_id
-        if skip:
-            params["skip"] = skip
-        if limit:
-            params["limit"] = limit
-        if filtering:
-            params["filtering"] = filtering
+    async def list(self, **params):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=self.base_url + "value/list/",
                 params=params
             ) as response:
                 response_body = await response.json()
-                return response_body
+                return response_body, response.status
 
-    async def update(self, value_id: str, values: dict, position: int,
-                     table_id: str = None, storage_id: str = None, collection_position: int = 1):
+    async def update(self, value_id: str, data: dict, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
-            data = {
-                "values": values
-            }
-            if position:
-                data["position"] = position
-            if table_id:
-                data["table"] = table_id
-            if storage_id:
-                data["storage"] = storage_id
-
             async with session.put(
                 url=self.base_url + f"value/{value_id}/update/",
                 params={"collection_position": collection_position},
                 json=data
             ) as response:
                 response_body = await response.json()
-                if response.status == 200:
-                    return response_body.get("_id")
-                return response_body
+                return response_body, response.status
 
     async def delete(self, value_id: str, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
@@ -79,13 +47,17 @@ class ValuesClient(CmsClient):
                 url=self.base_url + f"value/{value_id}/delete/",
                 params={"collection_position": collection_position}
             ) as response:
-                if response.status == 200:
-                    return True
+                if response.status == 204:
+                    return None, response.status
                 else:
-                    return False
+                    response_body = await response.json()
+                    return response_body, response.status
 
     async def copy(self, value_id: str, table_id: str, collection_position: int = 1):
-        original_value = await self.retrieve(value_id=value_id, collection_position=collection_position)
-        copy_value = await self.create(values=original_value.get("values"), table_id=table_id,
-                                       collection_position=collection_position, index=value_id)
-        return copy_value
+        response_body, status_code = await self.retrieve(value_id=value_id, collection_position=collection_position)
+        if status_code == 200:
+            response_body, status_code = await self.create(
+                {"values": response_body.get("values"), "table_id": table_id,
+                 "collection_position": collection_position, "index": value_id}
+            )
+            return response_body, status_code
