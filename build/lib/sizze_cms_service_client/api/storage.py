@@ -82,7 +82,7 @@ class StorageClient(CmsClient):
                         field_create, _ = await field_client.create(
                             data={"table": table_id, "field": field["field"], "name": field["name"]}
                         )
-                        field["_id"] = field_create
+                        field["_id"] = field_create.get("_id")
 
                 if isinstance(values, list) and len(values) > 0:
                     value_client = ValuesClient(base_url=self.base_url)
@@ -113,4 +113,4 @@ class StorageClient(CmsClient):
                         value_create, _ = await value_client.create(
                             data={"values": value.get("new_values"), "table_id": table_id}
                         )
-                        value["_id"] = value_create
+                        value["_id"] = value_create.get("_id")
