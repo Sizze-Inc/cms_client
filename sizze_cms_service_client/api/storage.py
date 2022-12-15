@@ -79,8 +79,8 @@ class StorageClient(CmsClient):
                             to_table = field["field"]["to_table"].split(split_val)
                             table = next(item for item in template if item["name"] == to_table[0])
                             field["field"]["to_table"] = table[to_table[1]]
-                        field_create = await field_client.create(
-                            table=table_id, field=field["field"], name=field["name"]
+                        field_create, _ = await field_client.create(
+                            data={"table": table_id, "field": field["field"], "name": field["name"]}
                         )
                         field["_id"] = field_create
 
@@ -110,7 +110,7 @@ class StorageClient(CmsClient):
 
                             value["new_values"][new_key] = new_val
 
-                        value_create = await value_client.create(
-                            values=value.get("new_values"), table_id=table_create
+                        value_create, _ = await value_client.create(
+                            data={"values": value.get("new_values"), "table_id": table_id}
                         )
                         value["_id"] = value_create
