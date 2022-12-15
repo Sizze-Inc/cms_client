@@ -64,7 +64,7 @@ class StorageClient(CmsClient):
         for table in template:
             table_client = TableClient(base_url=self.base_url)
             response_body, status_code = await table_client.create(
-                data={"storage_id": storage, "table_name": table.get("name")}, collection_position=collection_position
+                data={"storage": storage, "table": table.get("name")}, collection_position=collection_position
             )
             if status_code == 201:
                 table_id = response_body.get("_id")
@@ -111,6 +111,6 @@ class StorageClient(CmsClient):
                             value["new_values"][new_key] = new_val
 
                         value_create, _ = await value_client.create(
-                            data={"values": value.get("new_values"), "table_id": table_id}
+                            data={"values": value.get("new_values"), "table": table_id}
                         )
                         value["_id"] = value_create.get("_id")
