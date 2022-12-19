@@ -60,57 +60,135 @@ class StorageClient(CmsClient):
                     return response_body, response.status
 
     async def template_create(self, template, storage, collection_position: int = 1):
-        split_val = "$"
+        """First template loop"""
+        await self.first_template_loop(storage=storage, template=template, collection_position=collection_position)
+        print(template)
+
+        # """Second template loop"""
+        # await self.second_template_loop(storage=storage, template=template, collection_position=collection_position)
+        # print(template)
+        #
+        # """Third template loop"""
+        # await self.third_template_loop(storage=storage, template=template, collection_position=collection_position)
+        # print(template)
+
+    async def first_template_loop(self, template, storage, collection_position):
+        table_client = TableClient(base_url=self.base_url)
         for table in template:
-            table_client = TableClient(base_url=self.base_url)
             response_body, status_code = await table_client.create(
-                data={"storage": storage, "name": table.get("name")}, collection_position=collection_position
+                data={"storage": storage, "name": table.get("name"), "type": table.get("type")},
+                collection_position=collection_position
             )
-            if status_code == 201:
-                table_id = response_body.get("_id")
-                table["_id"] = table_id
+            if status_code != 200:
+                return False
+            table["_id"] = table.get("_id")
+        return True
+
+    async def second_template_loop(self, template, storage, collection_position):
+        """Вторичный цикл, создает первичные поля и значение"""
+        field_client = FieldsClient(base_url=self.base_url)
+        value_client = ValuesClient(base_url=self.base_url)
+        table_client = TableClient(base_url=self.base_url)
+        for table in template:
+            table_id = table.get("_id")
+            if table_id:
+                """Создаются первичные поля, без (default, related_field, object_field, return_field, required=False)"""
                 fields = table.get("fields")
-                values = table.get("values")
                 if isinstance(fields, list) and len(fields) > 0:
-                    field_client = FieldsClient(base_url=self.base_url)
                     for field in fields:
                         field["table"] = table_id
                         if field["field"]["to_table"] is not None:
-                            to_table = field["field"]["to_table"].split(split_val)
-                            table = next(item for item in template if item["name"] == to_table[0])
-                            field["field"]["to_table"] = table[to_table[1]]
-                        field_create, _ = await field_client.create(
-                            data={"table": table_id, "field": field["field"], "name": field["name"]}
+                            to_table = field["field"]["to_table"].split(self.split_char)
+                            """Разделяем значение по раздилителю"""
+                            if len(to_table) == 2 and int(to_table[0]) and to_table[1] == "_id":
+                                """Проверяю условия разделитиля для to_table"""
+                                field["field"]["to_table"] = template[to_table[0]]
+                        """
+                        Создается копия field field так как при первичном создании required False,
+                        а после при третьем цикле будут установлены required из шаблона
+                        """
+                        copy_field_options = field["field"].copy()
+                        copy_field_options["required"] = False
+                        copy_field_options["default"] = None
+                        copy_field_options["object_field"] = "_id"
+                        copy_field_options["return_field"] = ["_id"]
+                        field_create, status_code = await field_client.create(
+                            data={"table": table_id, "field": copy_field_options, "name": field["name"]}
                         )
+                        if status_code != 200:
+                            return False
                         field["_id"] = field_create.get("_id")
+                template["fields"] = fields
 
+                """Создаются первичные значения"""
+                values = table.get("values")
+                """Создается копия values, которая будет обновлятся в цикле"""
+                copy_values = []
                 if isinstance(values, list) and len(values) > 0:
-                    value_client = ValuesClient(base_url=self.base_url)
-                    for value in values:
-                        value["table"] = table_id
-                        value["new_values"] = {}
-                        for key, val in value["values"].items():
-                            new_key = key.split(split_val)
-                            if isinstance(val, str):
-                                new_val = val.split(split_val)
-                            else:
-                                new_val = None
+                    for parent_value in values:
+                        copy_parent_value = parent_value.copy()
+                        copy_parent_value["table"] = table_id
+                        child_values = parent_value.get("values")
+                        if isinstance(child_values, dict):
+                            for field, value in child_values.items():
+                                template_field = self.get_field_from_template(
+                                    field_val=field, template=template
+                                )
+                                if template_field:
+                                    copy_parent_value["values"][template_field] = None
 
-                            if len(new_key) > 1:
-                                table = next(item for item in template if item["name"] == new_key[0])
-                                new_key = table[new_key[1]][int(new_key[2])][new_key[3]]
-                            else:
-                                new_key = key
-
-                            if new_val and len(new_val) > 1:
-                                table = next(item for item in template if item["name"] == new_val[0])
-                                new_val = table[new_val[1]][int(new_val[2])][new_val[3]]
-                            else:
-                                new_val = val
-
-                            value["new_values"][new_key] = new_val
-
-                        value_create, _ = await value_client.create(
-                            data={"values": value.get("new_values"), "table": table_id}
+                                split_value = value.split(self.split_char)
+                                """Если значение не отношение, то устанавливается из шаблона, иначе по Null"""
+                                if len(split_value) == 1:
+                                    copy_parent_value["values"][template_field] = value
+                        """Создаются значения"""
+                        value_create, status_code = await value_client.create(
+                            data=copy_parent_value
                         )
-                        value["_id"] = value_create.get("_id")
+                        if status_code != 200:
+                            return False
+                        copy_parent_value["_id"] = value_create.get("_id")
+                        copy_values.append(copy_parent_value)
+                        template["values"] = copy_values
+
+                if table.get("user_options") and isinstance(table.get("user_options"), dict):
+                    user_options = table.get("user_options")
+                    user_options["login_field"] = self.get_field_from_template(
+                        field_val=user_options.get("login_field"), template=template
+                    )
+                    user_options["password_field"] = self.get_field_from_template(
+                        field_val=user_options.get("password_field"), template=template
+                    )
+                    table["user_options"] = user_options
+                    response_body, status_code = await table_client.update(
+                        table_id=table_id,
+                        data={"user_options": user_options},
+                        collection_position=collection_position
+                    )
+                    if status_code != 200:
+                        return False
+
+    async def third_template_loop(self, template, storage, collection_position):
+        field_client = FieldsClient(base_url=self.base_url)
+        value_client = ValuesClient(base_url=self.base_url)
+        for table in template:
+            table_id = table.get("_id")
+            if table_id:
+                fields = table.get("fields")
+                values = table.get("values")
+                for field in fields:
+                    await field_client.update(
+                        field_id=field.get("_id"), data=field, collection_position=collection_position
+                    )
+                for value in values:
+                    await value_client.update(
+                        value_id=value.get("_id"), data=value, collection_position=collection_position
+                    )
+
+    async def get_field_from_template(self, field_val, template):
+        field_val_split = field_val.split(self.split_char)
+        if len(field_val_split) == 4:
+            field_table_id = int(field_val_split[0])
+            field_id = int(field_val_split[2])
+            field = template[field_table_id][field_val_split[1]][field_id]
+            return field
