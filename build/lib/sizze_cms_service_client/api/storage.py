@@ -68,7 +68,6 @@ class StorageClient(CmsClient):
 
         """Third template loop"""
         await self.third_template_loop(storage=storage, template=template, collection_position=collection_position)
-        print(template)
 
     async def first_template_loop(self, template, storage, collection_position):
         table_client = TableClient(base_url=self.base_url)
@@ -118,6 +117,8 @@ class StorageClient(CmsClient):
                         if status_code != 201:
                             return False
                         field["_id"] = field_create.get("_id")
+                        if field["field"]["field_type"] == "many_to_many":
+                            field["field"]["field_type"] = "one_to_many"
                 table["fields"] = fields
 
                 """Создаются первичные значения"""
@@ -153,16 +154,18 @@ class StorageClient(CmsClient):
 
                 if table.get("user_options") and isinstance(table.get("user_options"), dict):
                     user_options = table.get("user_options")
-                    user_options["login_field"] = await self.get_val_from_template(
+                    login_field = await self.get_val_from_template(
                         field_val=user_options.get("login_field"), template=template
                     )
-                    user_options["password_field"] = await self.get_val_from_template(
+                    password_feild = await self.get_val_from_template(
                         field_val=user_options.get("password_field"), template=template
                     )
+                    user_options["login_field"] = login_field.get("_id")
+                    user_options["password_field"] = password_feild.get("_id")
                     table["user_options"] = user_options
                     response_body, status_code = await table_client.update(
                         table_id=table_id,
-                        data={"user_options": user_options},
+                        data={"type": table["type"], "user_options": user_options},
                         collection_position=collection_position
                     )
                     if status_code != 200:
