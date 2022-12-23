@@ -31,6 +31,15 @@ class ValuesClient(CmsClient):
                 response_body = await response.json()
                 return response_body, response.status
 
+    async def search(self, **params):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    url=self.base_url + "value/search/",
+                    params=params
+            ) as response:
+                response_body = await response.json()
+                return response_body, response.status
+
     async def update(self, value_id: str, data: dict, collection_position: int = 1):
         async with aiohttp.ClientSession() as session:
             async with session.put(
