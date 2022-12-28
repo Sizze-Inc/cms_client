@@ -62,15 +62,17 @@ class StorageClient(CmsClient):
     async def template_create(self, template, storage, collection_position: int = 1):
         """First template loop"""
         await self.first_template_loop(storage=storage, template=template, collection_position=collection_position)
-
+        print(template)
         """Second template loop"""
         await self.second_template_loop(storage=storage, template=template, collection_position=collection_position)
-
+        print(template)
         """Third template loop"""
         await self.third_template_loop(storage=storage, template=template, collection_position=collection_position)
+        print(template)
 
     async def first_template_loop(self, template, storage, collection_position):
         table_client = TableClient(base_url=self.base_url)
+        counter = 0
         for table in template:
             response_body, status_code = await table_client.create(
                 data={"storage": storage, "name": table.get("name"), "type": table.get("type")},
@@ -78,7 +80,14 @@ class StorageClient(CmsClient):
             )
             if status_code != 201:
                 return False
-            table["_id"] = response_body.get("_id")
+            created_table, status_code = await table_client.retrieve(
+                table_id=response_body.get("_id"),
+                collection_position=collection_position
+            )
+            created_table["fields"] = table["fields"]
+            created_table["values"] = table["values"]
+            template[counter] = created_table
+            counter += 1
         return True
 
     async def second_template_loop(self, template, storage, collection_position):
@@ -86,11 +95,13 @@ class StorageClient(CmsClient):
         field_client = FieldsClient(base_url=self.base_url)
         value_client = ValuesClient(base_url=self.base_url)
         table_client = TableClient(base_url=self.base_url)
+        table_counter = 0
         for table in template:
             table_id = table.get("_id")
             if table_id:
                 """Создаются первичные поля, без (default, related_field, object_field, return_field, required=False)"""
                 fields = table.get("fields")
+                field_counter = 0
                 if isinstance(fields, list) and len(fields) > 0:
                     for field in fields:
                         field["table"] = table_id
@@ -116,10 +127,17 @@ class StorageClient(CmsClient):
                         )
                         if status_code != 201:
                             return False
-                        field["_id"] = field_create.get("_id")
-                        if field["field"]["field_type"] == "many_to_many":
-                            field["field"]["field_type"] = "one_to_many"
-                table["fields"] = fields
+                        field_retrieve, status_code = await field_client.retrieve(
+                            field_id=field_create.get("_id"),
+                            collection_position=collection_position
+                        )
+                        field_retrieve["field"]["required"] = field["field"]["required"]
+                        field_retrieve["field"]["default"] = field["field"]["default"]
+                        field_retrieve["field"]["object_field"] = field["field"]["object_field"]
+                        field_retrieve["field"]["return_field"] = field["field"]["return_field"]
+                        template[table_counter]["fields"][field_counter] = field_retrieve
+
+                        field_counter += 1
 
                 """Создаются первичные значения"""
                 values = table.get("values")
@@ -170,6 +188,7 @@ class StorageClient(CmsClient):
                     )
                     if status_code != 200:
                         return False
+            table_counter += 1
 
     async def third_template_loop(self, template, storage, collection_position):
         field_client = FieldsClient(base_url=self.base_url)
