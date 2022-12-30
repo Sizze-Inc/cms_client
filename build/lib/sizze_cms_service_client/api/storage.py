@@ -86,6 +86,7 @@ class StorageClient(CmsClient):
             )
             created_table["fields"] = table["fields"]
             created_table["values"] = table["values"]
+            created_table["user_options"] = table["user_options"]
             template[counter] = created_table
             counter += 1
         return True
