@@ -1,7 +1,7 @@
 Metadata-Version: 2.1
 Name: sizze-cms-client
-Version: 0.4.5
-Summary: fixed templater
+Version: 0.4.6
+Summary: Add storage retrieve by table, field, value
 Home-page: UNKNOWN
 Author: kabu1zhan
 License: Sizze

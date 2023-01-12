@@ -6,11 +6,10 @@ from sizze_cms_service_client.api.values import ValuesClient
 
 
 class StorageClient(CmsClient):
-    async def create(self, data: dict, collection_position: int = 1, template: dict = None):
+    async def create(self, data: dict, template: dict = None):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=self.base_url + "storage/create/",
-                params={"collection_position": collection_position},
                 json=data,
             ) as response:
                 response_body = await response.json()
@@ -27,6 +26,36 @@ class StorageClient(CmsClient):
             ) as response:
                 response_body = await response.json()
                 return response_body, response.status
+
+    async def retrieve_storage_by_table(self, table_id: str, table_object: dict = None):
+        if table_object and table_object.get("storage"):
+            storage_id = table_object.get("storage")
+        else:
+            table_client = TableClient(base_url=self.base_url)
+            table = await table_client.retrieve(table_id=table_id)
+            storage_id = table.get("storage")
+        storage = await self.retrieve(storage_id=storage_id)
+        return storage
+
+    async def retrieve_storage_by_field_id(self, field_id: str, field_object: dict = None):
+        if field_object and field_object.get("table"):
+            table_id = field_object.get("table")
+        else:
+            field_client = FieldsClient(base_url=self.base_url)
+            field = await field_client.retrieve(field_id=field_id)
+            table_id = field.get("table")
+        storage = await self.retrieve_storage_by_table(table_id=table_id)
+        return storage
+
+    async def retrieve_storage_by_value_id(self, value_id: str, value_object: dict = None):
+        if value_object and value_object.get("table"):
+            table_id = value_object.get("table")
+        else:
+            value_client = ValuesClient(base_url=self.base_url)
+            value = await value_client.retrieve(value_id=value_id)
+            table_id = value.get("table")
+        storage = await self.retrieve_storage_by_table(table_id=table_id)
+        return storage
 
     async def list(self, **params):
         async with aiohttp.ClientSession() as session:
@@ -62,13 +91,10 @@ class StorageClient(CmsClient):
     async def template_create(self, template, storage, collection_position: int = 1):
         """First template loop"""
         await self.first_template_loop(storage=storage, template=template, collection_position=collection_position)
-        print(template)
         """Second template loop"""
         await self.second_template_loop(storage=storage, template=template, collection_position=collection_position)
-        print(template)
         """Third template loop"""
         await self.third_template_loop(storage=storage, template=template, collection_position=collection_position)
-        print(template)
 
     async def first_template_loop(self, template, storage, collection_position):
         table_client = TableClient(base_url=self.base_url)
