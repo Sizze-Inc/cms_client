@@ -111,9 +111,9 @@ class StorageClient(CmsClient):
         """First template loop"""
         await self.first_template_loop(storage=storage, template=template, collection_position=collection_position)
         """Second template loop"""
-        await self.second_template_loop(storage=storage, template=template, collection_position=collection_position)
+        await self.second_template_loop(template=template, collection_position=collection_position)
         """Third template loop"""
-        await self.third_template_loop(storage=storage, template=template, collection_position=collection_position)
+        await self.third_template_loop(template=template, collection_position=collection_position)
 
     async def first_template_loop(self, template, storage, collection_position):
         table_client = TableClient(base_url=self.base_url)
@@ -137,7 +137,7 @@ class StorageClient(CmsClient):
             counter += 1
         return True
 
-    async def second_template_loop(self, template, storage, collection_position):
+    async def second_template_loop(self, template, collection_position):
         """Вторичный цикл, создает первичные поля и значение"""
         field_client = FieldsClient(base_url=self.base_url)
         value_client = ValuesClient(base_url=self.base_url)
