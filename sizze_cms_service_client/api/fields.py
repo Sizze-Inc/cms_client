@@ -1,78 +1,34 @@
-import aiohttp
-from sizze_cms_service_client.api.collection import CmsClient, CreateUpdateResult, RetrieveResult,\
-    ListResult, DeleteResult
+from sizze_cms_service_client.api.collection import CmsClient, ServerResponse
 
 
 class FieldsClient(CmsClient):
-    async def create(self, data: dict, collection_position: int = 1) -> CreateUpdateResult:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                url=self.base_url + "field/create/",
-                params={"collection_position": collection_position},
-                json=data
-            ) as response:
-                response_body = await response.json()
-                if response.status == 201:
-                    _id = response_body.get("_id")
-                    field_response = CreateUpdateResult(_id=_id)
-                else:
-                    field_response = CreateUpdateResult(result=False, error=response_body.get("message"))
-                return field_response
+    async def create(self, data: dict) -> ServerResponse:
+        self.path = "field/create/"
+        response = await self.send_request(method="post", data=data)
+        return response
 
-    async def retrieve(self, field_id: str, collection_position: int = 1) -> RetrieveResult:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url=self.base_url + "field/retrieve/",
-                params={"field_id": field_id, "collection_position": collection_position}
-            ) as response:
-                response_body = await response.json()
-                if response.status == 200:
-                    _id = response_body.get("_id")
-                    field_response = RetrieveResult(_id=_id, data=response_body)
-                else:
-                    field_response = RetrieveResult(result=False, error=response_body.get("message"))
-                return field_response
+    async def retrieve(self, field_id: str) -> ServerResponse:
+        self.path = f"field/retrieve/"
+        response = await self.send_request(method="get", field_id=field_id)
+        return response
 
-    async def list(self, **params) -> ListResult:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url=self.base_url + "field/list/",
-                params=params
-            ) as response:
-                response_body = await response.json()
-                if response.status == 200:
-                    _ids = [field.get("_id") for field in response_body]
-                    field_response = ListResult(data=response_body, _ids=_ids)
-                else:
-                    field_response = ListResult(result=False, error=response_body.get("message"))
-                return field_response
+    async def list(self, table_id, filtering=None) -> ServerResponse:
+        self.path = "field/list/"
+        response = await self.send_request(method="get", table_id=table_id, filtering=filtering)
+        return response
 
-    async def update(self, field_id: str, data: dict, collection_position: int = 1) -> CreateUpdateResult:
-        async with aiohttp.ClientSession() as session:
-            async with session.put(
-                url=self.base_url + f"field/{field_id}/update/",
-                params={"collection_position": collection_position},
-                json=data
-            ) as response:
-                response_body = await response.json()
-                if response.status == 200:
-                    _id = response_body.get("_id")
-                    field_response = CreateUpdateResult(_id=_id)
-                else:
-                    field_response = CreateUpdateResult(result=False, error=response_body.get("message"))
-                return field_response
+    async def update(self, field_id: str, data: dict) -> ServerResponse:
+        self.path = f"field/{field_id}/update/"
+        response = await self.send_request(method="put", data=data)
+        return response
 
-    async def delete(self, field_id: str, collection_position: int = 1) -> DeleteResult:
-        async with aiohttp.ClientSession() as session:
-            async with session.delete(
-                url=self.base_url + f"field/{field_id}/delete/",
-                params={"collection_position": collection_position}
-            ) as response:
-                if response.status == 204:
-                    return DeleteResult()
-                else:
-                    response_body = await response.json()
-                    return DeleteResult(error=response_body.get("message"))
+    async def delete(self, field_id: str) -> ServerResponse:
+        self.path = f"field/{field_id}/delete/"
+        response = await self.send_request(method="delete", field_id=field_id)
+        return response
+
+
+field_client = FieldsClient()
 
     # async def copy(self, field_id: str, table_id: str, collection_position: int = 1):
     #     response_body, status_code = await self.retrieve(field_id=field_id, collection_position=collection_position)

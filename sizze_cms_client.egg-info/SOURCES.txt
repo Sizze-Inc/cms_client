@@ -14,5 +14,6 @@ sizze_cms_service_client/api/copy.py
 sizze_cms_service_client/api/fields.py
 sizze_cms_service_client/api/storage.py
 sizze_cms_service_client/api/tables.py
+sizze_cms_service_client/api/templater.py
 sizze_cms_service_client/api/user.py
 sizze_cms_service_client/api/values.py

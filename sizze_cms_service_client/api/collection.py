@@ -1,67 +1,69 @@
+import aiohttp
+from settings import base_url
+
 
 class CmsClient:
-    def __init__(self, base_url=None, collection_position=None):
-        self.base_url = base_url
-        self.split_char = "$"
-        self.collection_position = collection_position
+    def __init__(self):
+        self.__base_url = base_url
+        self.__path = None
+        self.__session = None
 
-    def get_base_url(self):
-        return self.base_url
+    @property
+    def base_url(self):
+        return self.__base_url
 
-    def set_base_url(self, base_url):
-        self.base_url = base_url
+    @base_url.setter
+    def base_url(self, value):
+        self.__base_url = value
 
-    def get_collection_position(self):
-        return self.collection_position
+    @property
+    def path(self):
+        return self.__path
 
-    def set_collection_position(self, collection_position):
-        self.collection_position = collection_position
+    @path.setter
+    def path(self, value):
+        self.__path = value
+
+    def get_url(self):
+        return self.base_url + self.__path
+
+    async def get_session(self):
+        if not self.__session:
+            self.__session = aiohttp.ClientSession()
+        return self.__session
+
+    async def send_request(self, method, data=None, **params):
+        for param in params:
+            if param is None:
+                del param
+
+        session = await self.get_session()
+        url = await self.get_url()
+        match method:
+            case "get":
+                response = await session.get(url=url, params=params)
+            case "post":
+                response = await session.post(url=url, params=params, json=data)
+            case "put":
+                response = await session.put(url=url, params=params, json=data)
+            case "delete":
+                response = await session.delete(url=url, params=params)
+            case _:
+                raise ValueError("Method not found")
+        response_data = await response.json()
+        status_code = response.status
+        if status_code not in [200, 201, 204]:
+            raise ServerError(response_data.get("message"))
+        await session.close()
+        return ServerResponse(status=status_code, data=response_data, _id=response_data.get("_id"))
 
 
-class CmsResult:
-    def __init__(self, result: bool, error: str = None):
-        self.result = result
-        self.error = error
-
-
-class RetrieveResult(CmsResult):
-    def __init__(self, result=True, error=None, _id: str = None, data: dict = None):
-        super().__init__(result=result, error=error)
-        self.id = _id
+class ServerResponse:
+    def __init__(self, status: int, data: dict, _id=None):
+        self.status = status
         self.data = data
-
-    def __str__(self):
-        return self.data
-
-    def __repr__(self):
-        return self.data
-
-
-class ListResult(CmsResult):
-    def __init__(self, result=True, error=None, _ids: list = None, data: list = None):
-        super().__init__(result=result, error=error)
-        self.ids = _ids
-        self.data = data
-
-    def __str__(self):
-        return self.ids
-
-    def __repr__(self):
-        return self.ids
-
-
-class CreateUpdateResult(CmsResult):
-    def __init__(self, result=True, error=None, _id: str = None):
-        super().__init__(result=result, error=error)
         self.id = _id
 
-    def __str__(self):
-        return self.id
 
-    def __repr__(self):
-        return self.id
-
-
-class DeleteResult(CmsResult):
-    def __init__(self, result=True, error=None):
-        super().__init__(result=result, error=error)
+class ServerError(Exception):
+    pass
