@@ -24,8 +24,8 @@ class CmsClient:
     def path(self, value):
         self.__path = value
 
-    def get_url(self):
-        return self.base_url + self.__path
+    async def get_url(self):
+        return self.base_url + self.path
 
     async def get_session(self):
         if not self.__session:
