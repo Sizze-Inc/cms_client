@@ -1,5 +1,5 @@
 import aiohttp
-from settings import base_url
+from sizze_cms_service_client.settings import base_url
 
 
 class CmsClient:
