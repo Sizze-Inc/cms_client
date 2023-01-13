@@ -63,3 +63,6 @@ class StorageClient(CmsClient):
         self.path = f"storage/{storage_id}/list/"
         response = await self.send_request(method="delete", storage_id=storage_id)
         return response
+
+
+storage_client = StorageClient()
