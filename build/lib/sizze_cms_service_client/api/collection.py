@@ -22,11 +22,6 @@ class CmsClient:
     async def get_url(self):
         return self.base_url + self.path
 
-    async def get_session(self):
-        if not self.__session or self.__session.closed:
-            self.__session = aiohttp.ClientSession()
-        return self.__session
-
     async def get_id_from_data(self, data):
         if isinstance(data, dict):
             _id = data.get("_id")
@@ -39,24 +34,24 @@ class CmsClient:
             if val is None:
                 del params[key]
 
-        session = await self.get_session()
         url = await self.get_url()
-        match method:
-            case "get":
-                response = await session.get(url=url, params=params)
-            case "post":
-                response = await session.post(url=url, params=params, json=data)
-            case "put":
-                response = await session.put(url=url, params=params, json=data)
-            case "delete":
-                response = await session.delete(url=url, params=params)
-            case _:
-                raise ValueError("Method not found")
-        if response.status == 204:
-            response_data = dict()
-        else:
-            response_data = await response.json()
-        await session.close()
+        async with aiohttp.ClientSession() as session:
+            match method:
+                case "get":
+                    response = await session.get(url=url, params=params)
+                case "post":
+                    response = await session.post(url=url, params=params, json=data)
+                case "put":
+                    response = await session.put(url=url, params=params, json=data)
+                case "delete":
+                    response = await session.delete(url=url, params=params)
+                case _:
+                    raise ValueError("Method not found")
+            if response.status == 204:
+                response_data = dict()
+            else:
+                response_data = await response.json()
+            await session.close()
 
         if response.status in [400, 422]:
             raise ServerError(response_data.get("message"))
