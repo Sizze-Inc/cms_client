@@ -55,12 +55,12 @@ class StorageClient(CmsClient):
         return response
 
     async def update(self, data: dict, storage_id) -> ServerResponse:
-        self.path = f"storage/{storage_id}/list/"
+        self.path = f"storage/{storage_id}/update/"
         response = await self.send_request(method="put", data=data)
         return response
 
     async def delete(self, storage_id: str) -> ServerResponse:
-        self.path = f"storage/{storage_id}/list/"
+        self.path = f"storage/{storage_id}/delete/"
         response = await self.send_request(method="delete", storage_id=storage_id)
         return response
 

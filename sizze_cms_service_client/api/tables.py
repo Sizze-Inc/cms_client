@@ -36,9 +36,9 @@ class TableClient(CmsClient):
                 )
         return table_path
 
-    async def list(self, storage_id: str) -> ServerResponse:
+    async def list(self, storage_id: str, skip=0, limit=100) -> ServerResponse:
         self.path = "table/list/"
-        response = await self.send_request(method="get", storage_id=storage_id)
+        response = await self.send_request(method="get", storage_id=storage_id, skip=skip, limit=limit)
         return response
 
     async def update(self, table_id: str, data: dict) -> ServerResponse:

@@ -36,12 +36,3 @@ class ValuesClient(CmsClient):
 
 
 value_client = ValuesClient()
-    #
-    # async def copy(self, value_id: str, table_id: str, collection_position: int = 1):
-    #     response_body, status_code = await self.retrieve(value_id=value_id, collection_position=collection_position)
-    #     if status_code == 200:
-    #         response_body, status_code = await self.create(
-    #             {"values": response_body.get("values"), "table_id": table_id,
-    #              "collection_position": collection_position, "index": value_id}
-    #         )
-    #         return response_body, status_code

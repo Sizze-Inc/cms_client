@@ -12,9 +12,9 @@ class FieldsClient(CmsClient):
         response = await self.send_request(method="get", field_id=field_id)
         return response
 
-    async def list(self, table_id, filtering=None) -> ServerResponse:
+    async def list(self, table_id, skip: int = 0, limit: int = 100, filtering=None) -> ServerResponse:
         self.path = "field/list/"
-        response = await self.send_request(method="get", table_id=table_id, filtering=filtering)
+        response = await self.send_request(method="get", table_id=table_id, skip=skip, limit=limit, filtering=filtering)
         return response
 
     async def update(self, field_id: str, data: dict) -> ServerResponse:
