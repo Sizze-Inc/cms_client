@@ -24,8 +24,8 @@ class StorageClient(CmsClient):
             storage_id = table_object.get("storage")
         else:
             table_client = TableClient()
-            table, _ = await table_client.retrieve(table_id=table_id)
-            storage_id = table.get("storage")
+            table = await table_client.retrieve(table_id=table_id)
+            storage_id = table.data.get("storage")
         storage = await self.retrieve(storage_id=storage_id)
         return storage
 
@@ -34,8 +34,8 @@ class StorageClient(CmsClient):
             table_id = field_object.get("table")
         else:
             field_client = FieldsClient()
-            field, _ = await field_client.retrieve(field_id=field_id)
-            table_id = field.get("table")
+            field = await field_client.retrieve(field_id=field_id)
+            table_id = field.data.get("table")
         storage = await self.retrieve_storage_by_table(table_id=table_id)
         return storage
 
@@ -44,8 +44,8 @@ class StorageClient(CmsClient):
             table_id = value_object.get("table")
         else:
             value_client = ValuesClient()
-            value, _ = await value_client.retrieve(value_id=value_id)
-            table_id = value.get("table")
+            value = await value_client.retrieve(value_id=value_id)
+            table_id = value.data.get("table")
         storage = await self.retrieve_storage_by_table(table_id=table_id)
         return storage
 

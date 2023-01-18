@@ -42,14 +42,22 @@ class TableClient(CmsClient):
         return response
 
     async def related_list(self, table_id):
-        self.path = f"/table/{table_id}/relation/list/"
+        self.path = f"table/{table_id}/relation/list/"
         response = await self.send_request(method="get", table_id=table_id)
         return response
 
     async def short_related_list(self, table_id):
-        self.path = f"/table/{table_id}/relation/short/list/"
+        self.path = f"table/{table_id}/relation/short/list/"
         response = await self.send_request(method="get", table_id=table_id)
         return response
+
+    async def get_table_path(self, from_table, to_table) -> list:
+        related_list = await self.related_list(table_id=from_table)
+        try:
+            path = next(path_item for path_item in related_list.data if path_item[-1]["table"] == to_table)
+        except StopIteration:
+            path = None
+        return path
 
     async def update(self, table_id: str, data: dict) -> ServerResponse:
         self.path = f"table/{table_id}/update/"
