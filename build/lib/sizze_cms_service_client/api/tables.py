@@ -41,6 +41,16 @@ class TableClient(CmsClient):
         response = await self.send_request(method="get", storage_id=storage_id, skip=skip, limit=limit)
         return response
 
+    async def related_list(self, table_id):
+        self.path = f"/table/{table_id}/relation/list/"
+        response = await self.send_request(method="get", table_id=table_id)
+        return response
+
+    async def short_related_list(self, table_id):
+        self.path = f"/table/{table_id}/relation/short/list/"
+        response = await self.send_request(method="get", table_id=table_id)
+        return response
+
     async def update(self, table_id: str, data: dict) -> ServerResponse:
         self.path = f"table/{table_id}/update/"
         response = await self.send_request(method="put", data=data)
