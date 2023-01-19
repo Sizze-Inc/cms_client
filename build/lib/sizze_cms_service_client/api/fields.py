@@ -18,6 +18,11 @@ class FieldsClient(CmsClient):
         response = await self.send_request(method="get", table_id=table_id, skip=skip, limit=limit, filtering=filtering)
         return response
 
+    async def related_list(self, table_id) -> ServerResponse:
+        self.path = "field/list_related/"
+        response = await self.send_request(method="get", table_id=table_id)
+        return response
+
     async def update(self, field_id: str, data: dict) -> ServerResponse:
         self.path = f"field/{field_id}/update/"
         response = await self.send_request(method="put", data=data)
