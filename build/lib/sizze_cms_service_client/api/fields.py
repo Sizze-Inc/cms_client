@@ -1,5 +1,5 @@
 from sizze_cms_service_client.api.collection import CmsClient, ServerResponse
-from sizze_cms_service_client.api.tables import table_client
+from sizze_cms_service_client.api import tables
 
 
 class FieldsClient(CmsClient):
@@ -40,7 +40,7 @@ class FieldsClient(CmsClient):
             field = await self.retrieve(field_id=field_id)
             table_id = field.data.get("table")
 
-        table_path = await table_client.get_table_path(from_table=from_table, to_table=table_id)
+        table_path = await tables.table_client.get_table_path(from_table=from_table, to_table=table_id)
         table_path_iterator = iter(table_path)
         if len(table_path) > 0:
             field_path = []
