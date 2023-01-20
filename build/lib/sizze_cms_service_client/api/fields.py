@@ -39,6 +39,7 @@ class FieldsClient(CmsClient):
         else:
             field = await self.retrieve(field_id=field_id)
             table_id = field.data.get("table")
+
         table_path = await table_client.get_table_path(from_table=from_table, to_table=table_id)
         table_path_iterator = iter(table_path)
         if len(table_path) > 0:
@@ -52,6 +53,12 @@ class FieldsClient(CmsClient):
                         "field": {"id": next_item["field"], "index": next_item["field"]}
                     }
                 )
+            field_path.append(
+                {
+                    "table": {"id": table_id, "index": table_id},
+                    "field": {"id": field_id, "index": field_id}
+                }
+            )
         else:
             field_path = []
         return field_path

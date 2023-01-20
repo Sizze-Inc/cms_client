@@ -1,5 +1,5 @@
 from sizze_cms_service_client.api.collection import CmsClient, ServerResponse
-from sizze_cms_service_client.api.fields import FieldsClient
+from sizze_cms_service_client.api import fields
 
 
 class TableClient(CmsClient):
@@ -22,8 +22,7 @@ class TableClient(CmsClient):
         table_response = await self.retrieve(table_id=table_id)
         table_data = table_response.data
 
-        fields_client = FieldsClient()
-        fields_response = await fields_client.list(
+        fields_response = await fields.field_client.list(
             table_id=table_id
         )
         fields_data = fields_response.data
@@ -71,11 +70,3 @@ class TableClient(CmsClient):
 
 
 table_client = TableClient()
-
-    # async def copy(self, table_id: str, to_storage_id: str, collection_position: int = 1):
-    #     response_body, status_code = await self.retrieve(table_id=table_id, collection_position=collection_position)
-    #     if status_code == 200:
-    #         response_body, status_code = await self.create(
-    #             {"storage_id": to_storage_id, "table_name": response_body.get("name"), "index": table_id}
-    #         )
-    #         return response_body, status_code
