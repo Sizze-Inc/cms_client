@@ -7,9 +7,9 @@ class ValuesClient(CmsClient):
         response = await self.send_request(method="post", data=data)
         return response
 
-    async def retrieve(self, value_id) -> ServerResponse:
+    async def retrieve(self, value_id, depth=None) -> ServerResponse:
         self.path = f"value/retrieve/"
-        response = await self.send_request(method="get", value_id=value_id)
+        response = await self.send_request(method="get", value_id=value_id, depth=depth)
         return response
 
     async def list(self, table_id, filtering=None, depth=None, sort=None, skip: int = 0, limit: int = 100)\
