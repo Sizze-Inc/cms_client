@@ -28,13 +28,23 @@ class FieldsClient(CmsClient):
         response = await self.send_request(method="delete", field_id=field_id)
         return response
 
-    async def get_field_path(self, from_field, to_field):
-        self.path = f"field/retrieve_path/"
+    async def get_path_from_field(self, from_field, to_field):
+        self.path = f"field/retrieve_field_path/"
         field_path = await self.send_request(method="get", from_field=from_field, to_field=to_field)
+        return field_path
+
+    async def get_path_from_table(self, from_table, to_field):
+        self.path = f"field/retrieve_table_path/"
+        field_path = await self.send_request(method="get", from_table=from_table, to_field=to_field)
         return field_path
 
     async def list_related(self, table_id):
         self.path = f"field/list_related/"
+        fields = await self.send_request(method="get", table_id=table_id)
+        return fields
+
+    async def list_short_related(self, table_id):
+        self.path = f"field/list_short_related/"
         fields = await self.send_request(method="get", table_id=table_id)
         return fields
 
