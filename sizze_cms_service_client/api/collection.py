@@ -44,7 +44,7 @@ class CmsClient:
                 case "put":
                     response = await session.put(url=url, params=params, json=data)
                 case "delete":
-                    response = await session.delete(url=url, params=params)
+                    response = await session.delete(url=url, params=params, json=data)
                 case _:
                     raise ValueError("Method not found")
             if response.status == 204:

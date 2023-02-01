@@ -34,5 +34,10 @@ class ValuesClient(CmsClient):
         response = await self.send_request(method="delete", value_id=value_id)
         return response
 
+    async def multiple_delete(self, value_ids: list) -> ServerResponse:
+        self.path = f"value/multiple_delete/"
+        response = await self.send_request(method="delete", value_ids=value_ids)
+        return response
+
 
 value_client = ValuesClient()
