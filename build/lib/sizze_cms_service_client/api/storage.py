@@ -14,6 +14,12 @@ class StorageClient(CmsClient):
             await templater.template_create(template=template, storage=response.id)
         return response
 
+    async def copy(self, old_project_id: int, new_project_id: int, user_id: str, nodes: dict):
+        self.path = "duplicate/storage/"
+        data = {"old_project_id": old_project_id, "new_project_id": new_project_id, "users": [user_id], "nodes": nodes}
+        response = await self.send_request(method="post", data=data)
+        return response
+
     async def retrieve(self, storage_id: str = None, project_id: str = None) -> ServerResponse:
         self.path = f"storage/retrieve/"
         response = await self.send_request(method="get", storage_id=storage_id, project_id=project_id)
